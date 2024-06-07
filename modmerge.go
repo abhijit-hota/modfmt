@@ -6,6 +6,29 @@ import (
 	"golang.org/x/mod/modfile"
 )
 
+func MergeRequires(goModFilename string) ([]byte, error) {
+	contents, err := os.ReadFile(goModFilename)
+	if err != nil {
+		return nil, err
+	}
+
+	mod, err := modfile.ParseLax(goModFilename, contents, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := mergeRequires(mod); err != nil {
+		return nil, err
+	}
+
+	updatedContents, err := mod.Format()
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedContents, nil
+}
+
 func mergeRequires(mod *modfile.File) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -44,27 +67,4 @@ func mergeRequires(mod *modfile.File) (err error) {
 	mod.Cleanup()
 
 	return
-}
-
-func MergeRequires(goModFilename string) ([]byte, error) {
-	contents, err := os.ReadFile(goModFilename)
-	if err != nil {
-		return nil, err
-	}
-
-	mod, err := modfile.ParseLax(goModFilename, contents, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := mergeRequires(mod); err != nil {
-		return nil, err
-	}
-
-	updatedContents, err := mod.Format()
-	if err != nil {
-		return nil, err
-	}
-
-	return updatedContents, nil
 }

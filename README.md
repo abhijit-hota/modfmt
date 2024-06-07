@@ -16,7 +16,7 @@ This tool merges require blocks in `go.mod` files since [`go mod tidy` doesn't d
 ## Installation
 
 ```sh
-go install abhijithota.me/modfmt
+go install abhijithota.me/modmerge
 ```
 
 ## Usage
@@ -24,13 +24,12 @@ go install abhijithota.me/modfmt
 The binary outputs the formatted `go.mod` to standard output. In your Go project root, run:
 
 ```sh
-modfmt > go.mod
+modmerge > go.mod
 ```
 
 ## Limitations
 
 I hacked this tool together using the official parser in less than 2 hours and unsurprisingly there are a few drawbacks with this:
-
 
 - `require` blocks come last after using this. Can be fixed with little effort I think?
 - Comments in `require` blocks are not preserved.

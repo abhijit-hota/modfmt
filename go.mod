@@ -1,4 +1,4 @@
-module abhijithota.me/modfmt
+module abhijithota.me/modmerge
 
 go 1.22.4
 

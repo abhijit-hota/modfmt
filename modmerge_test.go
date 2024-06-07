@@ -12,7 +12,7 @@ const (
 	updatedTestFileName = "testdata/updated_go.mod"
 )
 
-func TestModfmt(t *testing.T) {
+func TestMergeRequires(t *testing.T) {
 	// fmt the go.mod file
 	updatedContents, err := MergeRequires(testFileName)
 	if err != nil {
