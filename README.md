@@ -1,4 +1,4 @@
-# ModMerge
+# `modmerge`
 
 This tool merges require blocks in `go.mod` files since [`go mod tidy` doesn't do it](https://github.com/golang/go/issues/56471).
 
