@@ -1,4 +1,4 @@
-# `modmerge`
+# `modfmt`
 
 This tool merges require blocks in `go.mod` files since [`go mod tidy` doesn't do it](https://github.com/golang/go/issues/56471). It also separates the direct and indirect dependencies and sorts them alphabetically.
 
@@ -16,7 +16,7 @@ This tool merges require blocks in `go.mod` files since [`go mod tidy` doesn't d
 ## Installation
 
 ```sh
-go install go.abhijithota.me/modmerge@latest
+go install go.abhijithota.me/modfmt@latest
 ```
 
 ## Usage
@@ -24,7 +24,7 @@ go install go.abhijithota.me/modmerge@latest
 The binary outputs the formatted `go.mod` to standard output. In your Go project root, run:
 
 ```sh
-modmerge > go.mod
+modfmt > go.mod
 ```
 
 ## Limitations
