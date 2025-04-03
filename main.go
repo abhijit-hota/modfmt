@@ -1,10 +1,10 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
-	"slices"
 )
 
 const gomodName = "go.mod"
@@ -21,9 +21,14 @@ func run() error {
 		return fmt.Errorf("failed to merge requires: %w", err)
 	}
 
+	var inplace bool
+	flag.BoolVar(&inplace, "in-place", false, "replace the contents of go.mod with the updated contents")
+	flag.BoolVar(&inplace, "i", false, "replace the contents of go.mod with the updated contents")
+	flag.Parse()
+
 	// check if we want to replace the contents of go.mod
-	if slices.Contains(os.Args, "--in-place") {
-		return inplace(gomodName, updatedContents)
+	if inplace {
+		return updateInplace(gomodName, updatedContents)
 	}
 
 	// print updated contents to stdout
@@ -31,7 +36,7 @@ func run() error {
 	return nil
 }
 
-func inplace(modLocation string, updatedContents []byte) error {
+func updateInplace(modLocation string, updatedContents []byte) error {
 	// get current file info
 	info, err := os.Stat(modLocation)
 	if err != nil {
@@ -42,6 +47,6 @@ func inplace(modLocation string, updatedContents []byte) error {
 	if err = os.WriteFile(modLocation, updatedContents, info.Mode()); err != nil {
 		return fmt.Errorf("failed to write updated go.mod: %w", err)
 	}
-	
+
 	return nil
 }
