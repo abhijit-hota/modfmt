@@ -1,17 +1,11 @@
 # `modfmt`
 
-This tool merges require blocks in `go.mod` files since [`go mod tidy` doesn't do it](https://github.com/golang/go/issues/56471). It also separates the direct and indirect dependencies and sorts them alphabetically.
+This tool merges require blocks in `go.mod` files since [`go mod tidy` doesn't do it](https://github.com/golang/go/issues/56471). 
+It also separates the direct and indirect dependencies and sorts them alphabetically.
 
-<table>
-<tr>
-    <th> Before </th>
-    <th> After </th>
-</tr>
-<tr>
-    <td><img src=".github/before.png"/></td>
-    <td><img src=".github/after.png"/></td>
-</tr>
-</table>
+| Before                       | After                       |
+|------------------------------|-----------------------------|
+| <img src="docs/before.png"/> | <img src="docs/after.png"/> |
 
 ## Installation
 
