@@ -16,7 +16,7 @@ This tool merges require blocks in `go.mod` files since [`go mod tidy` doesn't d
 ## Installation
 
 ```sh
-go install go.abhijithota.me/modfmt@latest
+go install github.com/abhijit-hota/modfmt@latest
 ```
 
 ## Usage
