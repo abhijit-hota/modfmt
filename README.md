@@ -23,11 +23,11 @@ go install go.abhijithota.me/modfmt@latest
 
 The binary outputs the formatted `go.mod` to standard output.
 
-Alternatively, you can use the `--replace` flag to replace the contents of the `go.mod` file in place.
+Alternatively, you can use the `--in-place` flag to replace the contents of the `go.mod` file in place.
 
 In your Go project root, run:
 ```sh
-modfmt --replace
+modfmt --in-place
 ```
 
 ## Limitations
