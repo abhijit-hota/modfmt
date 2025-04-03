@@ -22,7 +22,7 @@ func run() error {
 	}
 
 	// check if we want to replace the contents of go.mod
-	if !slices.Contains(os.Args, "--replace") {
+	if !slices.Contains(os.Args, "--in-place") {
 		// replace not found, so print updated contents to stdout
 		fmt.Println(string(updatedContents))
 		return nil
