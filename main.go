@@ -31,7 +31,6 @@ func run() error {
 		return updateInplace(gomodName, updatedContents)
 	}
 
-	// print updated contents to stdout
 	fmt.Println(string(updatedContents))
 	return nil
 }
