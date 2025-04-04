@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bytes"
+	"errors"
 	"os"
+	"strings"
 	"testing"
 
 	"golang.org/x/mod/modfile"
@@ -11,6 +14,30 @@ const (
 	testFileName        = "testdata/go.mod"
 	updatedTestFileName = "testdata/updated_go.mod"
 )
+
+func TestRun(t *testing.T) {
+	t.Run("Should output error with invalid argument", func(t *testing.T) {
+		args := []string{"--invalid"}
+		output := bytes.NewBuffer(nil)
+
+		err := run(args, output)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+
+		if !errors.Is(err, ErrFailedToParseFlags) {
+			t.Fatalf("Expected error to be %v, got %v", ErrFailedToParseFlags, err)
+		}
+
+		if output.Len() == 0 {
+			t.Fatal("Expected output, got nothing")
+		}
+
+		if !strings.Contains(output.String(), "flag provided but not defined: -invalid") {
+			t.Fatalf("Expected output to contain 'flag provided but not defined: -invalid', got '%s'", output.String())
+		}
+	})
+}
 
 func TestMergeRequires(t *testing.T) {
 	// fmt the go.mod file
