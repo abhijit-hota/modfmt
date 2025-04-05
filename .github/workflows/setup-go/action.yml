@@ -1,0 +1,37 @@
+name: Setup Go
+description: |
+  This action sets up Go for use in actions by:
+  - extracts the Go version from the go.mod file
+  - runs the setup-go action to install the specified Go version
+  - runs go mod download to install dependencies
+
+outputs:
+  go-mod-version:
+    description: Version of Go extracted from go.mod file
+    value: ${{ steps.go-version.outputs.go-mod-version }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Extract Go version
+      uses: arnested/go-version-action@8a203e9ff069cbbf4e3b65cb248101cfe307c71c # v1.1.18
+      id: go-version
+
+    - name: Split version code
+      uses: xom9ikk/split@10ba6c9f71c5953bc304e21781213e933b043891 #v1.1
+      id: split
+      with:
+        string: ${{ steps.go-version.outputs.go-mod-version }}
+        separator: .
+        limit: 2
+
+    - name: Set up Go
+      uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5.3.0
+      with:
+        go-version: '${{ steps.split.outputs._0 }}.${{ steps.split.outputs._1 }}'
+        check-latest: true
+        cache: true
+
+    - name: Install dependencies
+      shell: bash
+      run: go mod download ${{ runner.debug == '1' && '-x ' || '' }}all
