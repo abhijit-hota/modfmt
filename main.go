@@ -1,30 +1,44 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"os"
 )
 
 const gomodName = "go.mod"
 
+var ErrFailedToParseFlags = fmt.Errorf("failed to parse flags")
+
 func main() {
-	if err := run(); err != nil {
+	if err := run(os.Args[1:], os.Stdout); err != nil {
+		if errors.Is(err, ErrFailedToParseFlags) {
+			os.Exit(2)
+		}
+
 		log.Fatal(err)
 	}
 }
 
-func run() error {
+func run(args []string, output io.Writer) error {
 	updatedContents, err := MergeRequires(gomodName)
 	if err != nil {
 		return fmt.Errorf("failed to merge requires: %w", err)
 	}
 
 	var inplace bool
-	flag.BoolVar(&inplace, "in-place", false, "replace the contents of go.mod with the updated contents")
-	flag.BoolVar(&inplace, "i", false, "replace the contents of go.mod with the updated contents")
-	flag.Parse()
+
+	fs := flag.NewFlagSet("default", flag.ContinueOnError)
+	fs.SetOutput(output)
+
+	fs.BoolVar(&inplace, "in-place", false, "replace the contents of go.mod with the updated contents")
+	fs.BoolVar(&inplace, "i", false, "replace the contents of go.mod with the updated contents")
+	if err := fs.Parse(args); err != nil {
+		return fmt.Errorf("%w: %w", ErrFailedToParseFlags, err)
+	}
 
 	// check if we want to replace the contents of go.mod
 	if inplace {

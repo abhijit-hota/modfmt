@@ -1,0 +1,98 @@
+name: Run tests and validate coverage
+
+on:
+  pull_request:
+
+env:
+  TARGET_COVERAGE_DIFF: 5
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  test:
+    name: Run tests and validate coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      - name: Set up Go
+        uses: ./.github/workflows/setup-go
+
+      - name: Run tests with coverage
+        run: |
+          go test ./... \
+            -v \
+            -coverprofile=cover.out \
+            -covermode=atomic \
+            -coverpkg ./... \
+            -race \
+            -buildvcs=true \
+            -shuffle=on
+
+      - name: Remove mocks from coverage
+        run: grep -v "/mocks" cover.out > cover.filtered.out
+
+      - name: Get total coverage
+        run: |
+          echo "TOTAL_COVERAGE=`go tool cover -func cover.filtered.out | grep total | awk '{print substr($3, 1, length($3)-3)}'`" \
+            >> $GITHUB_ENV
+
+      - name: Read build config
+        id: build_config
+        uses: pietrobolcato/action-read-yaml@9f13718d61111b69f30ab4ac683e67a56d254e1d # 1.1.0
+        with:
+          config: ${{ github.workspace }}/build-config.yaml
+
+      - name: Calculate target coverage
+        run: |
+          echo "TARGET_COVERAGE=$(( \
+                ${{ steps.build_config.outputs['requiredCoverage'] || 100 }} \
+                + \
+                ${{ env.TARGET_COVERAGE_DIFF }} \
+              ))" >> $GITHUB_ENV
+
+      - name: Ensure coverage is good
+        uses: thollander/actions-comment-pull-request@24bffb9b452ba05a4f3f77933840a6a841d1b32b # v3
+        with:
+          comment-tag: build_coverage
+          mode: ${{ fromJSON(env.TOTAL_COVERAGE) < (steps.build_config.outputs['requiredCoverage'] || 100) && 'upsert' || 'delete' }}
+          message: |
+            > [!CAUTION]
+            > ## :cry: Coverage is too low :cry:
+            > Total coverage is `${{ env.TOTAL_COVERAGE }}%` but the required coverage is `${{ steps.build_config.outputs['requiredCoverage'] || 100 }}%`.
+
+              Please add additional tests to increase coverage.
+
+      - name: Fail if coverage is too low
+        if: fromJSON(env.TOTAL_COVERAGE) < (steps.build_config.outputs['requiredCoverage'] || 100)
+        run: exit 1
+
+      - name: Comment PR to update build coverage
+        uses: thollander/actions-comment-pull-request@24bffb9b452ba05a4f3f77933840a6a841d1b32b # v3
+        with:
+          comment-tag: build_coverage
+          mode: ${{ fromJSON(env.TOTAL_COVERAGE) > fromJSON(env.TARGET_COVERAGE) && 'upsert' || 'delete' }}
+          message: |
+            > [!TIP]
+            > ## :heart_eyes: Coverage has improved  :heart_eyes:
+            > You may want to update the coverage configuration in `./build-config.yaml` to:
+              `requiredCoverage: ${{ env.TOTAL_COVERAGE }}`
+
+              ```diff
+              diff --git a/build-config.yaml b/build-config.yaml
+              --- a/build-config.yaml
+              +++ b/build-config.yaml
+              @@ -1,1 +1,1 @@
+              -requiredCoverage: ${{ steps.build_config.outputs['requiredCoverage'] || 100 }}
+              +requiredCoverage: ${{ env.TOTAL_COVERAGE }}
+              ```
