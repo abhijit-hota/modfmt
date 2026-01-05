@@ -24,6 +24,12 @@ In your Go project root, run:
 modfmt --in-place
 ```
 
+The `--check` command will override other flags, and will instead return a non-zero exit code if the `go.mod` file is
+not formatted, or zero if it is already formatted. This is useful for validating `go.mod` files in CI pipelines.
+```sh
+modfmt --check
+```
+
 ## Limitations
 
 I hacked this tool together using the official parser in less than 2 hours and unsurprisingly there are a few drawbacks with this:
